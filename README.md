@@ -1,7 +1,7 @@
 # Preferences
 
-![NPM version][https://img.shields.io/npm/dm/preferences.svg]
-![NPM downloads][https://img.shields.io/npm/dt/preferences.svg]
+![NPM version](https://img.shields.io/npm/dm/preferences.svg)
+![NPM downloads](https://img.shields.io/npm/dt/preferences.svg)
 
 Node.JS Module for handling local user preferences.
 Designed for CLI applications.
