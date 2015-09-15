@@ -1,6 +1,6 @@
 {
   "name": "preferences",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Manage application preferences",
   "main": "index.js",
   "scripts": {
