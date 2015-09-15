@@ -1,0 +1,26 @@
+{
+  "name": "preferences",
+  "version": "0.1.0",
+  "description": "Manage application preferences",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CaffeinaLab/preferences.git"
+  },
+  "keywords": [
+    "config",
+    "preferences"
+  ],
+  "author": "Stefano Azzolini <stefano.azzolini@caffeina.it> (http://caffeina.it)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/CaffeinaLab/preferences/issues"
+  },
+  "homepage": "https://github.com/CaffeinaLab/preferences#readme",
+  "dependencies": {
+    "configstore": "^1.2.1"
+  }
+}
