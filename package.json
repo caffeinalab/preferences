@@ -1,17 +1,15 @@
 {
   "name": "preferences",
-  "version": "0.1.1",
-  "description": "Manage application preferences",
+  "version": "0.1.2",
+  "description": "Manage CLI application preferences",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/CaffeinaLab/preferences.git"
   },
   "keywords": [
     "config",
+    "cli",
     "preferences"
   ],
   "author": "Stefano Azzolini <stefano.azzolini@caffeina.it> (http://caffeina.it)",
