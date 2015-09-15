@@ -3,7 +3,7 @@
 ![NPM version](https://img.shields.io/npm/dm/preferences.svg)
 ![NPM downloads](https://img.shields.io/npm/dt/preferences.svg)
 
-Node.JS Module for handling encrypted user preferences.
+Node.JS Module for handling **encrypted** user preferences.
 
 Designed for CLI applications.
 
@@ -17,14 +17,15 @@ npm install --save preferences
 
 ```js
 var Preferences = require("preferences");
+
 // Init preference file with an unique identifier and an optional default data
 var prefs = new Preferences('com.your.app.identifier',{
   account: {
     username: 'MrRobot',
     password: 'fsociety'
   },
-	test: {
-		cycles: 1
+  test: {
+    cycles: 1
   }
 });
 
@@ -35,6 +36,16 @@ console.log(prefs.account);
 ```
 
 Preferences are automatically saved on disk before process exit.
+
+Encryption uses your private ssh key if founded, otherwise it will automatically use an identifier dependant generated password.
+
+You can override the default key path in the options:
+
+```js
+var prefs = new Preferences('com.foo.bar',{}, {
+  key: '~/certs/my-custom-key.pem'
+});
+```
 
 ## License
 

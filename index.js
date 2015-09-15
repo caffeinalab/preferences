@@ -1,45 +1,70 @@
 "use strict";
 
-function Preferences(id, def_prefs){
-
+function Preferences(id, defs, options) {
+  options               = options || { key: null }
   var self              = this,
+      identifier        = id.replace(/[\/\?<>\\:\*\|" :]/g,'.').replace(/\.+/g,'.'),
       path              = require('path'),
-      dirpath           = path.join(require('os-homedir')(), '.config', 'preferences'),
-      filepath          = path.join(dirpath,id + '.pref'),
-      savedData         = null,
+      homedir           = require('os-homedir')(),
+      dirpath           = path.join(homedir, '.config', 'preferences'),
+      filepath          = path.join(dirpath,identifier + '.pref'),
       fs                = require('graceful-fs'),
-      mkdirp            = require('mkdirp'),
       writeFileAtomic   = require('write-file-atomic'),
-      crypto            = require("crypto"),
-      cipher            = crypto.createCipher("aes192", 'PREFS-' + id),
-      decipher          = crypto.createDecipher("aes192", 'PREFS-' + id),
-      savePristine      = false;
+      mkdirp            = require('mkdirp'),
+      crypto            = require('crypto'),
+      password          = (function(){
+        var key = options.key || path.join(homedir,'.ssh','id_rsa')
+        try {
+          // Use private SSH key or...
+          return fs.readFileSync(key).toString('utf8')
+        } catch(e) {
+          // ...fallback to an id dependant password
+          return 'PREFS-' + identifier
+        }
+      })(),
+      savePristine      = false,
+      savedData         = null
 
-  function save() {
-    var payload = '';
-    try {
-      payload = cipher.update(JSON.stringify(self)||'{}', "utf8", "hex") + cipher.final('hex');
-      mkdirp.sync(dirpath, parseInt('0700', 8));
-      writeFileAtomic.sync(filepath, payload, {mode: parseInt('0600', 8)});
-    } catch(err) {}
-  };
-
-  try {
-    savedData = JSON.parse(decipher.update(fs.readFileSync(filepath, 'utf8'), "hex", "utf8") + decipher.final('utf8'));
-  } catch (err) {
-    savedData = def_prefs || {};
-    savePristine = true;
+  function encode(text) {
+    var cipher = crypto.createCipher('aes128', password)
+    return cipher.update(new Buffer(text).toString('utf8'), 'utf8', 'hex') + cipher.final('hex')
   }
 
-  for (var o in savedData) this[o] = savedData[o];
+  function decode(text) {
+    var decipher = crypto.createDecipher('aes128', password)
+    return decipher.update(String(text), 'hex', 'utf8') + decipher.final('utf8')
+  }
 
-  //Object.observe(this, save);
+  function save() {
+    var payload = encode(String(JSON.stringify(self) || '{}'))
+    try {
+      mkdirp.sync(dirpath, parseInt('0700', 8))
+      writeFileAtomic.sync(filepath, payload, { mode: parseInt('0600', 8) })
+    } catch(err) {}
+  }
 
-  savePristine && save();
+  try {
+    // Try to read and decode preferences saved on disc
+    savedData = JSON.parse(decode(fs.readFileSync(filepath, 'utf8')))
+  } catch (err) {
+    // Read error (maybe file doesn't exist) so update with defaults
+    savedData = defs || {}
+    savePristine = true
+  }
 
-  process.on('exit',save);
+  // Clone object
+  for (var o in savedData) self[o] = savedData[o]
 
-  return this;
+  // Config file was empty, save default values
+  savePristine && save()
+
+  // Save all on program exit
+  process.on('exit', save)
+
+  // If supported observe object for saving on modify
+  if (Object.observe) Object.observe(self, save)
+
+  return self
 }
 
-module.exports = Preferences;
+module.exports = Preferences
