@@ -4,7 +4,7 @@ function Preferences(id, def_prefs){
 
   var self              = this,
       path              = require('path'),
-      dirpath           = path.join(require('os').homedir(), '.config', 'preferences'),
+      dirpath           = path.join(require('os-homedir')(), '.config', 'preferences'),
       filepath          = path.join(dirpath,id + '.pref'),
       savedData         = null,
       fs                = require('graceful-fs'),
