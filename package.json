@@ -21,6 +21,9 @@
   },
   "homepage": "https://github.com/CaffeinaLab/preferences#readme",
   "dependencies": {
-    "configstore": "^1.2.1"
+    "configstore": "^1.2.1",
+    "graceful-fs": "^4.1.2",
+    "mkdirp": "^0.5.1",
+    "write-file-atomic": "^1.1.3"
   }
 }
