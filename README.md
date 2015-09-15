@@ -3,7 +3,7 @@
 ![NPM version](https://img.shields.io/npm/dm/preferences.svg)
 ![NPM downloads](https://img.shields.io/npm/dt/preferences.svg)
 
-Node.JS Module for handling local user preferences.
+Node.JS Module for handling encrypted user preferences.
 
 Designed for CLI applications.
 
