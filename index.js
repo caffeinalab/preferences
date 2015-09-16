@@ -1,46 +1,50 @@
-"use strict";
+'use strict'
 
-function Preferences(id, defs, options) {
-  options               = options || { key: null }
-  var self              = this,
-      identifier        = id.replace(/[\/\?<>\\:\*\|" :]/g,'.').replace(/\.+/g,'.'),
-      path              = require('path'),
-      homedir           = require('os-homedir')(),
-      dirpath           = path.join(homedir, '.config', 'preferences'),
-      filepath          = path.join(dirpath,identifier + '.pref'),
-      fs                = require('graceful-fs'),
-      writeFileAtomic   = require('write-file-atomic'),
-      mkdirp            = require('mkdirp'),
-      crypto            = require('crypto'),
-      password          = (function(){
-        var key = options.key || path.join(homedir,'.ssh','id_rsa')
-        try {
-          // Use private SSH key or...
-          return fs.readFileSync(key).toString('utf8')
-        } catch(e) {
-          // ...fallback to an id dependant password
-          return 'PREFS-' + identifier
-        }
-      })(),
-      savePristine      = false,
-      savedData         = null
+function Preferences (id, defs, options) {
+  options = options || {
+    key: null
+  }
+  var self = this
+  var identifier = id.replace(/[\/\?<>\\:\*\|" :]/g, '.').replace(/\.+/g, '.')
+  var path = require('path')
+  var homedir = require('os-homedir')()
+  var dirpath = path.join(homedir, '.config', 'preferences')
+  var filepath = path.join(dirpath, identifier + '.pref')
+  var fs = require('graceful-fs')
+  var writeFileAtomic = require('write-file-atomic')
+  var mkdirp = require('mkdirp')
+  var crypto = require('crypto')
+  var password = (function () {
+    var key = options.key || path.join(homedir, '.ssh', 'id_rsa')
+    try {
+      // Use private SSH key or...
+      return fs.readFileSync(key).toString('utf8')
+    } catch (e) {
+      // ...fallback to an id dependant password
+      return 'PREFS-' + identifier
+    }
+  })()
+  var savePristine = false
+  var savedData = null
 
-  function encode(text) {
+  function encode (text) {
     var cipher = crypto.createCipher('aes128', password)
     return cipher.update(new Buffer(text).toString('utf8'), 'utf8', 'hex') + cipher.final('hex')
   }
 
-  function decode(text) {
+  function decode (text) {
     var decipher = crypto.createDecipher('aes128', password)
     return decipher.update(String(text), 'hex', 'utf8') + decipher.final('utf8')
   }
 
-  function save() {
+  function save () {
     var payload = encode(String(JSON.stringify(self) || '{}'))
     try {
       mkdirp.sync(dirpath, parseInt('0700', 8))
-      writeFileAtomic.sync(filepath, payload, { mode: parseInt('0600', 8) })
-    } catch(err) {}
+      writeFileAtomic.sync(filepath, payload, {
+        mode: parseInt('0600', 8)
+      })
+    } catch (err) {}
   }
 
   try {

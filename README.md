@@ -7,6 +7,8 @@ Node.JS Module for handling **encrypted** user preferences.
 
 Designed for CLI applications.
 
+[![js-standard-style](https://cdn.rawgit.com/feross/standard/master/badge.svg)](https://github.com/feross/standard)
+
 ## Installation
 
 ```sh
@@ -49,4 +51,4 @@ var prefs = new Preferences('com.foo.bar',{}, {
 
 ## License
 
-MIT
+MIT. Copyright (c) 2015 Caffeina.
