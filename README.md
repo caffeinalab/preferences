@@ -11,6 +11,8 @@ Designed for CLI applications.
 
 ## Installation
 
+[![NPM](https://nodei.co/npm/preferences.png)](https://npmjs.org/package/preferences)
+
 ```sh
 npm install --save preferences
 ```
