@@ -36,7 +36,7 @@ var prefs = new Preferences('com.your.app.identifier',{
 // Preferences can be accessed directly
 prefs.test.cycles++;
 
-console.log(prefs.account);
+console.log(prefs);
 ```
 
 Preferences are automatically saved on disk before process exit.
