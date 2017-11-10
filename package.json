@@ -3,6 +3,7 @@
   "version": "0.2.1",
   "description": "Manage CLI application encrypted preferences.",
   "main": "index.js",
+  "types": "index.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/CaffeinaLab/preferences.git"
