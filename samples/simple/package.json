@@ -1,0 +1,24 @@
+{
+  "name": "simple",
+  "version": "1.0.0",
+  "description": "Simple example using preferences",
+  "main": "out/index.js",
+  "bin": "out/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/caffeinalab/preferences.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/caffeinalab/preferences/issues"
+  },
+  "homepage": "https://github.com/caffeinalab/preferences#readme",
+  "dependencies": {
+    "@types/node": "^8.0.50",
+    "preferences": "^0.2.1"
+  }
+}
