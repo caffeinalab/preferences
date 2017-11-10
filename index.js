@@ -47,6 +47,25 @@ function Preferences (id, defs, options) {
     } catch (err) {}
   }
 
+  function clear () {
+    for (var o in self) delete self[o]
+    save()
+  }
+
+  if (Object.defineProperty) {
+    Object.defineProperty(self, "save", {
+      enumerable: false,
+      writable: false,
+      value: save
+    });
+
+    Object.defineProperty(self, "clear", {
+      enumerable: false,
+      writable: false,
+      value: clear
+    });
+  }
+
   try {
     // Try to read and decode preferences saved on disc
     savedData = JSON.parse(decode(fs.readFileSync(filepath, 'utf8')))
