@@ -12,7 +12,7 @@ function Preferences (id, defs, options) {
   var path = require('path')
   var homedir = require('os-homedir')()
   var dirpath =  options.file ? path.dirname(options.file) : path.join(homedir, '.config', 'preferences')
-  var filepath = options.file ? path.basename(options.file) : path.join(dirpath, identifier + '.pref')
+  var filepath = options.file ? path.join(dirpath, path.basename(options.file)) : path.join(dirpath, identifier + '.pref')
   var encrypt = options.encrypt;
   var format = options.format;
   var fs = require('graceful-fs')
