@@ -1,7 +1,8 @@
 declare interface PreferencesOptions {
     key?: string
     encrypt?: boolean
-    format?: ('json'|'yaml')
+    format?: ('json'|'yaml'),
+    file?: string
 }
 
 declare class Preferences {
