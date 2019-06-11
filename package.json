@@ -25,7 +25,6 @@
     "graceful-fs": "^4.1.2",
     "js-yaml": "^3.10.0",
     "mkdirp": "^0.5.1",
-    "os-homedir": "^1.0.1",
     "write-file-atomic": "^1.1.3"
   }
 }

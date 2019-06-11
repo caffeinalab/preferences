@@ -10,7 +10,7 @@ function Preferences (id, defs, options) {
   var self = this
   var identifier = id.replace(/[\/\?<>\\:\*\|" :]/g, '.').replace(/\.+/g, '.')
   var path = require('path')
-  var homedir = require('os-homedir')()
+  var homedir = os.homedir()
   var dirpath =  options.file ? path.dirname(options.file) : path.join(homedir, '.config', 'preferences')
   var filepath = options.file ? path.join(dirpath, path.basename(options.file)) : path.join(dirpath, identifier + '.pref')
   var encrypt = options.encrypt;
@@ -35,13 +35,13 @@ function Preferences (id, defs, options) {
 
   function encode (text) {
     if (!encrypt) return text;
-    var cipher = crypto.createCipher('aes128', password)
+    var cipher = crypto.createCipheriv('aes128', password)
     return cipher.update(new Buffer(text).toString('utf8'), 'utf8', 'hex') + cipher.final('hex')
   }
 
   function decode (text) {
     if (!encrypt) return text;
-    var decipher = crypto.createDecipher('aes128', password)
+    var decipher = crypto.createDecipheriv('aes128', password)
     return decipher.update(String(text), 'hex', 'utf8') + decipher.final('utf8')
   }
 
