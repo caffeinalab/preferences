@@ -1,6 +1,6 @@
 {
   "name": "prefs",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Manage CLI application encrypted preferences.",
   "main": "index.js",
   "types": "index.d.ts",
