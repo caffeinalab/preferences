@@ -1,9 +1,9 @@
 const { encode, decode }  = require('../lib/crypto')
+const { describe, it, expect } = require('../lib/testrunner')
 const fs = require('fs');
 const path = require('path')
 const os = require('os')
 const crypto = require('crypto');
-const assert = require('assert')
 const homedir = os.homedir()
 
 let key = '';
@@ -22,6 +22,6 @@ describe('Crypto module', () => {
     const enc = encode(text, key);
     const decoded = decode(enc, key);
     
-    assert.equal(text, decoded)
+    expect(text).toBe(decoded)
   })
 })
