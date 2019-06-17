@@ -1,27 +1,49 @@
 'use strict'
+const os = require('os');
+const path = require('path')
 
-function Preferences (id, defs, options) {
-  options = options || {
-    key: null,
-    file: null,
-    encrypt: true,
-    format: 'json'
-  }
-  var self = this
-  var identifier = id.replace(/[\/\?<>\\:\*\|" :]/g, '.').replace(/\.+/g, '.')
-  var path = require('path')
-  var homedir = require('os-homedir')()
-  var dirpath =  options.file ? path.dirname(options.file) : path.join(homedir, '.config', 'preferences')
-  var filepath = options.file ? path.join(dirpath, path.basename(options.file)) : path.join(dirpath, identifier + '.pref')
-  var encrypt = options.encrypt;
-  var format = options.format;
-  var fs = require('graceful-fs')
-  var writeFileAtomic = require('write-file-atomic')
-  var mkdirp = require('mkdirp')
-  var crypto = require('crypto')
-  var yaml = require('js-yaml')
-  var password = (function () {
-    var key = options.key || path.join(homedir, '.ssh', 'id_rsa')
+const { encode, decode, legacyDecode } = require('./lib/crypto')
+const padText = require('./lib/toThirtytwo');
+const fs = require('graceful-fs')
+const writeFileAtomic = require('write-file-atomic')
+const mkdirp = require('mkdirp')
+const yaml = require('js-yaml')
+
+const defaultOptions =  {
+  key: null,
+  file: null,
+  encrypt: true,
+  format: 'json',
+}
+
+function Preferences (id, defs, options = defaultOptions) {
+  const homedir = os.homedir()
+  // eslint-disable-next-line no-useless-escape
+  const identifier = id.replace(/[\/\?<>\\:\*\|" :]/g, '.').replace(/\.+/g, '.')
+  const dirpath =  options.file ? path.dirname(options.file) : path.join(homedir, '.config', 'preferences')
+  const filepath = options.file ? path.join(dirpath, path.basename(options.file)) : path.join(dirpath, identifier + '.pref')
+  const { encrypt, format } = options
+
+  let savePristine = false
+  let savedData = null
+  let convertFromLegacy = false
+
+  const key = (function () {
+    let key;
+    if (options.key) key = padText(options.key, identifier)
+    else key = path.join(homedir, '.ssh', 'id_rsa')
+    try {
+      // Use private SSH key or...
+      return fs.readFileSync(key).toString('utf8').slice(0, 32)
+    } catch (e) {
+      // ...fallback to an id dependant password
+      return padText('PREFS', identifier)
+    }
+  })()
+
+  // retaining old code in order to be able to decode exisiting preferences
+  const legacyPassword = (function () {
+    const key = options.key || path.join(homedir, '.ssh', 'id_rsa')
     try {
       // Use private SSH key or...
       return fs.readFileSync(key).toString('utf8')
@@ -30,82 +52,89 @@ function Preferences (id, defs, options) {
       return 'PREFS-' + identifier
     }
   })()
-  var savePristine = false
-  var savedData = null
 
-  function encode (text) {
-    if (!encrypt) return text;
-    var cipher = crypto.createCipher('aes128', password)
-    return cipher.update(new Buffer(text).toString('utf8'), 'utf8', 'hex') + cipher.final('hex')
-  }
+  const serialize = (data) => {
+    return format == 'yaml' 
+      ? yaml.safeDump(data)
+      : JSON.stringify(data)
+  };
 
-  function decode (text) {
-    if (!encrypt) return text;
-    var decipher = crypto.createDecipher('aes128', password)
-    return decipher.update(String(text), 'hex', 'utf8') + decipher.final('utf8')
-  }
+  const deserialize = (text) => {
+    return format == 'yaml' 
+      ? yaml.safeLoad(text)
+      : JSON.parse(text)
+  };
 
-  function serialize (data) {
-    if (format == 'yaml') return yaml.safeDump(data)
-    return JSON.stringify(data)
-  }
-
-  function deserialize (text) {
-    if (format == 'yaml') return yaml.safeLoad(text)
-    return JSON.parse(text)
-  }
-
-  function save () {
-    var payload = encode(String(serialize(self) || '{}'))
+  const save = () => {
+    let payload = String(serialize(this) || '{}')
+    if (encrypt) payload = encode(payload, key);
     try {
       mkdirp.sync(dirpath, parseInt('0700', 8))
       writeFileAtomic.sync(filepath, payload, {
-        mode: parseInt('0600', 8)
+        mode: parseInt('0600', 8),
       })
-    } catch (err) {}
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err)
+    }
   }
 
-  function clear () {
-    for (var o in self) delete self[o]
+  const clear = () => {
+    for (let o in this) delete this[o]
     save()
   }
 
   if (Object.defineProperty) {
-    Object.defineProperty(self, "save", {
+    Object.defineProperty(this, 'save', {
       enumerable: false,
       writable: false,
-      value: save
+      value: save,
     });
 
-    Object.defineProperty(self, "clear", {
+    Object.defineProperty(this, 'clear', {
       enumerable: false,
       writable: false,
-      value: clear
+      value: clear,
     });
   }
 
+  // Try to read and decode preferences saved on disc
+  let fileContents = '';
   try {
-    // Try to read and decode preferences saved on disc
-    savedData = deserialize(decode(fs.readFileSync(filepath, 'utf8')))
-  } catch (err) {
+    fileContents = fs.readFileSync(filepath, 'utf8')
+  } 
+  catch (err) {
     // Read error (maybe file doesn't exist) so update with defaults
     savedData = defs || {}
     savePristine = true
   }
-
+  if (fileContents) {
+    let results = fileContents
+    if (encrypt) {
+      try {
+        results = decode(fileContents, key)
+      }
+      catch (e) {
+        results = legacyDecode(fileContents, legacyPassword)
+        convertFromLegacy = true;
+      }
+    }
+    savedData = deserialize(results)
+  }
+  
   // Clone object
-  for (var o in savedData) self[o] = savedData[o]
+  for (let o in savedData) this[o] = savedData[o]
 
   // Config file was empty, save default values
-  savePristine && save()
+  savePristine || convertFromLegacy && save()
 
   // Save all on program exit
   process.on('exit', save)
 
   // If supported observe object for saving on modify
-  if (Object.observe) Object.observe(self, save)
+  if (Object.observe) Object.observe(this, save)
 
-  return self
+  return this
 }
 
 module.exports = Preferences
