@@ -4,10 +4,8 @@ const path = require('path')
 
 const { encode, decode, legacyDecode } = require('./lib/crypto')
 const padText = require('./lib/toThirtytwo');
-const fs = require('graceful-fs')
-const writeFileAtomic = require('write-file-atomic')
-const mkdirp = require('mkdirp')
-const yaml = require('js-yaml')
+const fs = require('fs')
+const yaml = require('yaml')
 
 const defaultOptions =  {
   key: null,
@@ -55,13 +53,13 @@ function Preferences (id, defs, options = defaultOptions) {
 
   const serialize = (data) => {
     return format == 'yaml' 
-      ? yaml.safeDump(data)
+      ? yaml.stringify(data)
       : JSON.stringify(data)
   };
 
   const deserialize = (text) => {
     return format == 'yaml' 
-      ? yaml.safeLoad(text)
+      ? yaml.parse(text)
       : JSON.parse(text)
   };
 
@@ -69,10 +67,8 @@ function Preferences (id, defs, options = defaultOptions) {
     let payload = String(serialize(this) || '{}')
     if (encrypt) payload = encode(payload, key);
     try {
-      mkdirp.sync(dirpath, parseInt('0700', 8))
-      writeFileAtomic.sync(filepath, payload, {
-        mode: parseInt('0600', 8),
-      })
+      fs.mkdirSync(dirpath, { recursive: true, mode: parseInt('0700', 8) })
+      fs.writeFileSync(filepath, payload, { mode: parseInt('0600', 8) })
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error(err)
