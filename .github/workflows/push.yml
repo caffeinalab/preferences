@@ -1,4 +1,4 @@
-name: Build, test, publish
+name: Test & publish
 on: [push]
 jobs:
   build:
